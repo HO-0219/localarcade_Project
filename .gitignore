@@ -1,0 +1,50 @@
+# Environment and local secrets
+.env
+.env.*
+!.env.example
+
+# Frontend dependencies and build output
+node_modules/
+frontend/node_modules/
+frontend/dist/
+dist/
+.vite/
+
+# Java / Maven build output
+backend/target/
+target/
+*.class
+
+# Python cache and local environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Generated test and review artifacts
+reports/
+presentation/pdf_review/
+coverage/
+*.log
+*.tmp
+*.temp
+
+# Presentation and exported document files
+*.ppt
+*.pptx
+*.pdf
+*.txt
+
+# Office temporary files
+~$*
+
+# IDE settings
+.idea/
+.vscode/
+*.iml
+
+# Operating-system metadata
+.DS_Store
+Thumbs.db
+Desktop.ini
+
