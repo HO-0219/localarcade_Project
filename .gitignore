@@ -35,6 +35,10 @@ coverage/
 *.pdf
 *.txt
 
+# Loose screenshots in the repository root only.
+# Images inside Game/ and frontend/public/ remain tracked assets.
+/*.png
+
 # Office temporary files
 ~$*
 
@@ -47,4 +51,3 @@ coverage/
 .DS_Store
 Thumbs.db
 Desktop.ini
-
