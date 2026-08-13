@@ -8,6 +8,7 @@ Local Arcade는 같은 네트워크에 있는 최대 6명이 참여 코드로 �
 - 핵심 키워드: Server-authoritative · Multiplayer State · Game Logic · Generative AI · Interactive UI
 - 결과물: 5종 게임/콘텐츠 · 공용 및 역할별 채팅 · 통합 크레딧 · 관리자 대시보드
 - 실행 환경: 동일 LAN, 최대 6명
+- 포트폴리오: [Local Arcade 포트폴리오 PDF 보기](https://drive.google.com/file/d/1959HBu6Or4D62EfnpNkB3xhXY0n8wt6p/view?usp=drive_link)
 
 ![Local Arcade 메인 화면](./Game/메인화면.png)
 
@@ -213,6 +214,7 @@ gamePro/
 
 ## 관련 자료
 
+- [Local Arcade 포트폴리오 PDF](https://drive.google.com/file/d/1959HBu6Or4D62EfnpNkB3xhXY0n8wt6p/view?usp=drive_link)
 - [Frontend](./frontend)
 - [Backend](./backend)
 - [LLM 학습 위키](./LlmWiki_Backup/wiki)
