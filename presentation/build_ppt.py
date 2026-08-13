@@ -97,6 +97,37 @@ def pill(slide, label, x, y, w, color=MINT):
     rect(slide, x, y, w, .38, PANEL2, color)
     text(slide, label, x, y+.08, w, .18, 10, color, True, "Arial", PP_ALIGN.CENTER)
 
+def interview_slide(topic, questions, number):
+    s = base(f"예상 질문 · {topic}", "Interview follow-up", number)
+    text(s, "해당 페이지와 코드를 설명하다 보면 이러한 질문을 하실 수 있습니다.",
+         .72, 1.38, 11.7, .34, 14, MUTED, False)
+    colors = [MINT, BLUE, YELLOW]
+    for i, (question, answer) in enumerate(questions):
+        y = 1.92 + i * 1.55
+        c = colors[i % len(colors)]
+        text(s, f"Q{i+1}", .75, y+.08, .45, .25, 12, c, True, "Arial")
+        text(s, question, 1.35, y, 3.45, .58, 15, WHITE, True)
+        rect(s, 5.0, y-.08, 7.35, 1.22, PANEL, LINE)
+        text(s, "답변", 5.28, y+.12, .65, .22, 10, c, True)
+        text(s, answer, 6.0, y+.06, 6.02, .84, 12.5, WHITE)
+    text(s, "답변 원칙  ·  현재 구현과 확장 계획을 구분하고, 측정하지 않은 성능은 수치로 주장하지 않습니다.",
+         1.0, 6.7, 11.3, .28, 12, MUTED, True, align=PP_ALIGN.CENTER)
+    return s
+
+def engineering_detail_slide(title, premise, code_text, points, evidence, number):
+    s = base(title, "Engineering detail", number)
+    text(s, premise, .72, 1.38, 11.65, .48, 14, MUTED, False)
+    code(s, code_text, .7, 1.98, 5.55, 4.45, "IMPLEMENTATION EVIDENCE")
+    for i, (head, body, color) in enumerate(points):
+        y = 2.0 + i * 1.02
+        text(s, f"0{i+1}", 6.62, y+.12, .42, .22, 10, color, True, "Arial")
+        text(s, head, 7.16, y+.05, 1.55, .28, 14, WHITE, True)
+        text(s, body, 8.78, y+.02, 3.62, .55, 11.5, MUTED)
+        rect(s, 6.62, y+.74, 5.72, .012, LINE, LINE, False)
+    text(s, "근거", .72, 6.68, .55, .22, 11, BLUE, True)
+    text(s, evidence, 1.36, 6.62, 10.95, .32, 11.5, WHITE, True)
+    return s
+
 # 1. Cover
 s = prs.slides.add_slide(blank); s.background.fill.solid(); s.background.fill.fore_color.rgb = BG
 add_image(s, GAME / "메인화면.png", 0, 0, 13.333, 7.5, .04, "fill")
@@ -113,20 +144,155 @@ text(s, "2026  ·  기획 / 설계 / 구현 / 테스트", 1.08, 5.32, 5.5, .25, 
 # 2. Agenda
 s = base("Contents", "PORTFOLIO STRUCTURE", 2)
 sections = [
-    ("01", "Project", "문제 정의 · 사용자 흐름 · 구현 범위", MINT),
-    ("02", "Architecture", "기술 선택 · 서버 중심 상태 · 데이터 구조", BLUE),
-    ("03", "Engineering", "반복 트래픽 · 동시 명령 · 트랜잭션 · 통신", YELLOW),
-    ("04", "Features", "게임 규칙 · AI 퀴즈 · 운영 기능", PINK),
-    ("05", "Validation", "테스트 · 한계 · 확장 전략 · 회고", MINT),
+    ("01", "Problem", "문제 정의 · 해결 방향 · 핵심 가설", MINT),
+    ("02", "Opportunity", "타깃 · 경쟁 서비스 · 진입 전략 · 차별점", BLUE),
+    ("03", "Product", "사용 흐름 · 주요 기능 · 실제 화면", PINK),
+    ("04", "Engineering", "기술 선택 · 구조 · 동시성 · 트랜잭션 · AI", YELLOW),
+    ("05", "Validation", "자동 테스트 · 측정 결과 · 한계와 확장", MINT),
+    ("06", "Business & Me", "수익 가설 · 개인 기여 · 회고 · 다음 단계", BLUE),
 ]
 for i, (n, head, body, c) in enumerate(sections):
-    y = 1.48 + i * 1.02
+    y = 1.38 + i * .82
     text(s, n, .75, y + .18, .55, .28, 13, c, True, "Arial")
     text(s, head, 1.55, y + .12, 2.05, .32, 17, WHITE, True, "Arial")
     text(s, body, 3.85, y + .15, 7.85, .32, 14, MUTED)
-    rect(s, .75, y + .76, 11.55, .012, LINE, LINE, False)
-text(s, "핵심 관점", .75, 6.65, 1.4, .25, 11, MINT, True)
-text(s, "여러 사용자의 요청이 동시에 들어와도 공유 상태와 크레딧을 설명 가능하게 유지하는 방법", 2.15, 6.6, 10.0, .35, 15, WHITE, True)
+    rect(s, .75, y + .66, 11.55, .012, LINE, LINE, False)
+text(s, "상세 페이지 구성", .75, 6.48, 1.55, .25, 11, BLUE, True)
+text(s, "화면·코드로 먼저 이해 → 다음 장에서 설계 근거 → 예상 질문에 구현 범위로 답변", 2.35, 6.43, 9.85, .35, 13.5, WHITE, True)
+
+# Pitch opening — establish the problem and opportunity before the technical proof.
+problem_slide = base("왜 만들었는가: 함께 시작하기까지의 마찰", "01 · PROBLEM", 3)
+problems = [
+    ("START", "설치·계정·기기 준비", "짧게 함께 즐기려는 상황에서도 시작 전 준비가 경험보다 길어질 수 있습니다.", MINT),
+    ("FRAGMENT", "게임과 소통의 분리", "게임, 공용 채팅, 점수와 운영 기능이 흩어지면 진행자가 여러 도구를 관리해야 합니다.", BLUE),
+    ("TRUST", "공유 상태의 불일치", "여러 화면이 각자 결과를 만들면 턴·점수·보상에 대한 하나의 기준을 유지하기 어렵습니다.", YELLOW),
+]
+for i, (tag, head, body, c) in enumerate(problems):
+    x = .72 + i * 4.08
+    rect(problem_slide, x, 1.62, 3.7, 3.58, PANEL, LINE)
+    pill(problem_slide, tag, x+.28, 1.92, 1.0, c)
+    text(problem_slide, head, x+.28, 2.55, 3.1, .58, 19, WHITE, True)
+    text(problem_slide, body, x+.28, 3.36, 3.08, 1.15, 13, MUTED)
+text(problem_slide, "프로젝트 가설", .75, 5.72, 1.25, .25, 11, MINT, True)
+text(problem_slide, "같은 공간의 소규모 사용자는 ‘빠른 접속’과 ‘서버가 보장하는 동일한 결과’를 함께 원한다.", 2.05, 5.63, 10.1, .48, 17, WHITE, True)
+text(problem_slide, "※ 시장 전체의 불편을 단정한 것이 아니라, 교실·친구 모임에서 검증할 제품 가설로 정의했습니다.", .75, 6.5, 11.55, .3, 11.5, MUTED, align=PP_ALIGN.CENTER)
+problem_id = prs.slides._sldIdLst[-1]
+
+solution_slide = base("해결 방향: 코드 하나로 연결되는 로컬 서비스", "01 · SOLUTION", 4)
+solution_steps = [
+    ("01", "즉시 접속", "서버가 발급한 6자리 코드와 닉네임만으로 동일 LAN에서 참여", MINT),
+    ("02", "하나의 경험", "게임·공용 채팅·크레딧·랭킹·AI 퀴즈·관리 기능 통합", BLUE),
+    ("03", "서버 판정", "턴·결과·참가비·보상을 서버가 검증해 모든 화면에 같은 상태 제공", YELLOW),
+    ("04", "반복 검증", "최대 6명 동시 요청을 자동화하고 성공률·중복 차감·응답 시간을 기록", PINK),
+]
+for i, (n, head, body, c) in enumerate(solution_steps):
+    y = 1.5 + i * 1.18
+    text(solution_slide, n, .78, y+.18, .55, .28, 13, c, True, "Arial")
+    text(solution_slide, head, 1.55, y+.12, 2.05, .34, 17, WHITE, True)
+    rect(solution_slide, 3.82, y-.02, 8.5, .82, PANEL, LINE)
+    text(solution_slide, body, 4.12, y+.18, 7.9, .38, 13.5, MUTED)
+text(solution_slide, "한 줄 정의", .78, 6.5, 1.05, .24, 11, BLUE, True)
+text(solution_slide, "설치 부담 없이 접속하고, 서버가 동일한 게임 상태를 책임지는 LAN 기반 멀티플레이 플랫폼", 1.9, 6.43, 10.3, .38, 15, WHITE, True)
+solution_id = prs.slides._sldIdLst[-1]
+
+market_slide = base("누구에게 필요한가: 작고 가까운 그룹부터", "02 · TARGET & OPPORTUNITY", 5)
+targets = [
+    ("교실 · 실습실", "수업 전후 짧은 활동과 AI 학습 퀴즈", "관리자가 문제 생성과 점수를 운영", MINT),
+    ("친구 · 가족 모임", "한 화면을 함께 보며 바로 시작하는 미니게임", "개별 브라우저는 입력과 상태 확인에 사용", BLUE),
+    ("동아리 · 워크숍", "6명 이하 소그룹의 아이스브레이킹", "테마형 콘텐츠와 결과 화면으로 반복 운영", YELLOW),
+]
+for i, (head, use, value, c) in enumerate(targets):
+    x = .72 + i * 4.08
+    rect(market_slide, x, 1.55, 3.72, 3.72, PANEL, LINE)
+    text(market_slide, f"0{i+1}", x+.3, 1.88, .5, .25, 12, c, True, "Arial")
+    text(market_slide, head, x+.3, 2.3, 3.05, .45, 18, WHITE, True)
+    text(market_slide, "사용 장면", x+.3, 3.02, .9, .22, 10, c, True)
+    text(market_slide, use, x+.3, 3.35, 3.02, .66, 12.5, MUTED)
+    text(market_slide, "제공 가치", x+.3, 4.22, .9, .22, 10, c, True)
+    text(market_slide, value, x+.3, 4.53, 3.02, .58, 12.5, WHITE, True)
+text(market_slide, "초기 검증 지표", .75, 5.75, 1.35, .24, 11, BLUE, True)
+text(market_slide, "입장 완료율 · 첫 게임 시작 시간 · 세션당 재경기 수 · AI 퀴즈 완료율 · 운영자 개입 횟수", 2.2, 5.68, 9.95, .38, 14, WHITE, True)
+text(market_slide, "시장 규모 수치보다 실제 소그룹 파일럿에서 반복 사용 여부를 먼저 확인합니다.", .75, 6.5, 11.55, .3, 12, MUTED, align=PP_ALIGN.CENTER)
+market_id = prs.slides._sldIdLst[-1]
+
+competition_slide = base("경쟁 서비스와의 포지션", "02 · COMPETITION", 6)
+cols = [(.72, 2.15, "서비스"), (2.92, 2.25, "시작 방식"), (5.24, 2.15, "핵심 경험"), (7.49, 2.1, "공유 상태"), (9.68, 2.85, "Local Arcade와의 차이")]
+for x, w, label in cols:
+    rect(competition_slide, x, 1.48, w, .62, PANEL2, LINE)
+    text(competition_slide, label, x+.08, 1.68, w-.16, .22, 11, WHITE, True, align=PP_ALIGN.CENTER)
+rows = [
+    ("Jackbox", "호스트 구매·공유 화면\n참가자는 웹 기기", "파티형 게임", "호스트 화면 중심", "구매형 콘텐츠와 원격 화면 공유에 강점"),
+    ("Gartic Phone", "닉네임·초대 링크\n음성 통화 권장", "그리기·문장 전달", "라운드 결과 공유", "단일 놀이 흐름에 집중"),
+    ("Board Game Arena", "브라우저 계정·온라인", "보드게임 플레이", "서버 기반 게임 상태", "방대한 정식 보드게임 카탈로그"),
+    ("Local Arcade", "LAN·6자리 코드\n닉네임", "미니게임+채팅+AI 퀴즈", "서버 판정+공유 크레딧", "소규모 현장 운영과 기술 검증을 한 서비스에 통합"),
+]
+for i, row in enumerate(rows):
+    y = 2.13 + i * 1.0
+    fill = PANEL2 if i == 3 else PANEL
+    color = MINT if i == 3 else WHITE
+    widths = [2.15, 2.25, 2.15, 2.1, 2.85]
+    xs = [.72, 2.92, 5.24, 7.49, 9.68]
+    for j, value in enumerate(row):
+        rect(competition_slide, xs[j], y, widths[j], .94, fill, LINE)
+        text(competition_slide, value, xs[j]+.1, y+.14, widths[j]-.2, .62, 10.5 if j else 12, color if j == 0 else MUTED, j == 0, align=PP_ALIGN.CENTER, valign=MSO_ANCHOR.MIDDLE)
+text(competition_slide, "비교 기준은 기능의 우열이 아니라 시작 환경과 서비스 범위입니다.", .75, 6.32, 11.5, .28, 12, WHITE, True, align=PP_ALIGN.CENTER)
+text(competition_slide, "Sources · jackboxgames.com/how-to-play · garticphone.com · en.doc.boardgamearena.com  (2026-08-11 확인)", .75, 6.72, 11.5, .22, 9.5, MUTED, align=PP_ALIGN.CENTER)
+competition_id = prs.slides._sldIdLst[-1]
+
+entry_slide = base("시장 진입 가능성: 작은 파일럿에서 반복 사용으로", "02 · GO-TO-MARKET", 7)
+stages = [
+    ("01", "Portfolio Demo", "GitHub·발표·면접에서 실행 가능한 데모와 테스트 보고서 공개", "관찰: 입장 성공·게임 완료", MINT),
+    ("02", "Closed Pilot", "교실·친구 모임의 4~6명 세션에서 진행자 없이 시작 가능한지 확인", "검증: 재경기·이탈·오류", BLUE),
+    ("03", "Theme Package", "행사·수업 목적에 맞춘 퀴즈·배너·게임 구성을 패키지화", "검증: 재사용·운영 시간", YELLOW),
+    ("04", "Scale Decision", "원격 접속 수요가 확인되면 WebSocket·Room 분리·Redis를 단계 도입", "판단: 비용 대비 수요", PINK),
+]
+for i, (n, head, body, metric, c) in enumerate(stages):
+    x = .65 + i * 3.12
+    rect(entry_slide, x, 1.58, 2.78, 4.72, PANEL, LINE)
+    text(entry_slide, n, x+.25, 1.9, .45, .25, 12, c, True, "Arial")
+    text(entry_slide, head, x+.25, 2.38, 2.28, .55, 17, WHITE, True)
+    text(entry_slide, body, x+.25, 3.16, 2.28, 1.42, 12.2, MUTED)
+    rect(entry_slide, x+.2, 4.88, 2.38, .9, PANEL2, c)
+    text(entry_slide, metric, x+.34, 5.12, 2.1, .4, 11, c, True, align=PP_ALIGN.CENTER)
+    if i < 3:
+        text(entry_slide, "→", x+2.76, 3.65, .36, .4, 20, MUTED, True, "Arial", PP_ALIGN.CENTER)
+text(entry_slide, "대규모 배포를 먼저 가정하지 않고, 현재 6명 요구에서 얻은 근거로 다음 투자를 결정합니다.", .75, 6.64, 11.55, .3, 12.5, WHITE, True, align=PP_ALIGN.CENTER)
+entry_id = prs.slides._sldIdLst[-1]
+
+differentiation_slide = base("차별점: 기능 수보다 연결 방식과 검증 근거", "02 · DIFFERENTIATION", 8)
+diffs = [
+    ("LAN-FIRST", "설치·계정 없이 6자리 코드로 참여", "동일 공간의 최대 6명이라는 명확한 운영 범위", MINT),
+    ("ONE STATE", "게임·채팅·크레딧·랭킹을 한 서버 상태로 연결", "클라이언트가 아닌 서버가 최종 판정", BLUE),
+    ("MEASURED", "6명 동시 입장·참가·중복 거절·60회 조회 자동화", "Python 코드와 Markdown 리포트로 재현", YELLOW),
+    ("GROUNDED AI", "로컬 위키 발췌→Schema→서버 검증→DB 저장", "외부 API 장애 시 저장 문제로 대체", PINK),
+]
+for i, (tag, head, proof, c) in enumerate(diffs):
+    x = .72 + (i % 2) * 6.12
+    y = 1.55 + (i // 2) * 2.42
+    rect(differentiation_slide, x, y, 5.72, 2.08, PANEL, LINE)
+    pill(differentiation_slide, tag, x+.28, y+.26, 1.35, c)
+    text(differentiation_slide, head, x+.28, y+.88, 5.05, .48, 15, WHITE, True)
+    text(differentiation_slide, proof, x+.28, y+1.47, 5.05, .32, 11.5, MUTED)
+text(differentiation_slide, "차별점의 각 문장은 뒤의 화면·코드·테스트 결과 페이지에서 근거를 확인할 수 있습니다.", .75, 6.56, 11.55, .3, 13, WHITE, True, align=PP_ALIGN.CENTER)
+differentiation_id = prs.slides._sldIdLst[-1]
+
+profile_slide = base("개인 프로젝트 · 역할 개요", "02 · ABOUT THE BUILDER", 9)
+add_image(profile_slide, ROOT / "Yuni.png", .72, 1.52, 3.72, 4.62, mode="contain")
+text(profile_slide, "Full Stack Developer", 4.88, 1.6, 5.7, .38, 20, WHITE, True, "Arial")
+text(profile_slide, "기획부터 검증 자료 제작까지 1인 수행", 4.88, 2.08, 6.55, .38, 15, MUTED)
+roles = [
+    ("Product", "사용 흐름·게임 규칙·관리자 운영·프로모션 정책", MINT),
+    ("Frontend", "React 화면·상태 표현·애니메이션·반응형 UI", BLUE),
+    ("Backend", "Spring API·게임 판정·명령 큐·세션 정리", YELLOW),
+    ("Data & AI", "MySQL 트랜잭션·위키 기반 문제 생성·검증·저장", PINK),
+    ("Validation", "JUnit 규칙 테스트·Python 동시 요청·결과 리포트", MINT),
+]
+for i, (head, body, c) in enumerate(roles):
+    y = 2.78 + i * .68
+    text(profile_slide, head, 4.9, y+.06, 1.32, .25, 12, c, True, "Arial")
+    text(profile_slide, body, 6.4, y, 5.75, .38, 12.5, WHITE)
+text(profile_slide, "※ 실제 인물 사진과 이름은 공개 범위에 맞춰 최종 제출본에서 교체할 수 있도록 독립된 프로필 영역으로 구성", .75, 6.64, 11.55, .26, 10.5, MUTED, align=PP_ALIGN.CENTER)
+profile_id = prs.slides._sldIdLst[-1]
 
 # 3. Overview
 s = base("프로젝트 소개", "01 · OVERVIEW", 3)
@@ -252,6 +418,7 @@ for i,(a,b,c) in enumerate(items):
     x=.7+(i%2)*6.15; y=1.55+(i//2)*2.25
     rect(s,x,y,5.8,1.75,PANEL,c); text(s,f"0{i+1}",x+.25,y+.25,.55,.3,14,c,True,"Arial"); text(s,a,x+.95,y+.22,4.45,.35,17,WHITE,True); text(s,b,x+.95,y+.83,4.45,.45,14,MUTED)
 rect(s,1.55,6.15,10.2,.62,PANEL2,MINT); text(s,"기능을 만드는 것에서 끝내지 않고, 신뢰 가능한 서비스 상태를 설계하는 경험",1.75,6.35,9.8,.25,15,WHITE,True,align=PP_ALIGN.CENTER)
+retrospective_id = prs.slides._sldIdLst[-1]
 
 # 15. Result
 s=base("Result", "22 · OUTCOME", 23)
@@ -508,6 +675,471 @@ text(test_code_slide, "python scripts/local_arcade_concurrency_test.py --join-co
 text(test_code_slide, "산출물  reports/local-arcade-concurrency-*.md", 8.65, 6.62, 3.7, .28, 10.5, MUTED, False, "Consolas", PP_ALIGN.RIGHT)
 test_code_id = prs.slides._sldIdLst[-1]
 
+# Interview follow-up slides. Each is inserted immediately after the related
+# implementation page at the end of the build.
+qa_specs = [
+    ("아키텍처", "System Architecture", [
+        ("왜 클라이언트 상태를 최종 값으로 사용하지 않았나요?", "멀티플레이에서는 각 브라우저의 시점과 입력이 다를 수 있습니다. 클라이언트는 입력과 표현만 담당하고, 턴·결과·크레딧은 서버 값으로 다시 검증해 하나의 기준을 유지했습니다."),
+        ("단일 서버 메모리에 게임 상태를 둔 이유와 한계는 무엇인가요?", "최대 6명 LAN 환경에서는 구현 복잡도와 응답 비용이 낮다는 장점이 있습니다. 대신 재시작과 수평 확장에 취약하므로 규모가 커지면 Room 상태와 세션을 Redis 또는 DB로 외부화해야 합니다."),
+        ("서비스 계층이 한 서버에 모여 있어 결합도가 높지 않나요?", "현재는 배포 단위가 하나인 모듈형 모놀리스에 가깝습니다. 게임별 Service는 분리했지만 Player와 Credit은 공유합니다. 독립 확장이 필요해지는 시점에 이벤트와 명확한 경계를 기준으로 분리할 계획입니다."),
+    ]),
+    ("크레딧 정산", "크레딧 정산의 전체 생명주기", [
+        ("@Transactional을 붙이면 게임 상태도 모두 롤백되나요?", "아닙니다. JPA가 관리하는 DB 변경만 롤백되고 Java 메모리의 참가자·턴·pot은 대상이 아닙니다. 이 한계를 슬라이드에 명시했고, 확장 시 게임 상태도 영속 저장소로 이동해야 합니다."),
+        ("명령 큐와 synchronized를 함께 쓰는 이유는 무엇인가요?", "큐는 변경 명령의 순서와 적재량을 통제하고, synchronized는 서비스 임계 구역을 보호합니다. 현재는 방어적으로 함께 사용하지만 Room별 큐가 서비스 호출 경로를 완전히 통제하면 임계 범위를 줄일 수 있습니다."),
+        ("차감과 보상의 트랜잭션 경계가 너무 길지 않나요?", "각 API 호출 안의 DB 변경만 짧게 묶었습니다. 게임 전체 시간을 하나의 트랜잭션으로 유지하지 않습니다. 참가 차감과 결과 정산은 서로 다른 사건으로 분리되어 있습니다."),
+    ]),
+    ("게임 상태와 결과 동기화", "모든 플레이어가 같은 결과를 공유하는 레이싱", [
+        ("야추에서 화면의 주사위 값을 요청으로 보내면 조작할 수 있지 않나요?", "요청 값은 판정 자료로 신뢰하지 않고 서버가 보유한 배열과 일치하는지만 확인합니다. 점수 계산도 서버 주사위로 수행하므로 수정된 클라이언트 값으로 점수를 만들 수 없습니다."),
+        ("레이싱 결과의 공정성은 어떻게 보장하나요?", "서버의 SecureRandom으로 결과를 한 번 생성해 모든 사용자에게 동일하게 제공합니다. 현재는 내부 게임 점수 범위이며 감사 가능한 공정성이 요구되면 결과 로그와 seed 공개 또는 commit-reveal 방식이 추가로 필요합니다."),
+        ("클라이언트가 같은 결과 애니메이션을 여러 번 실행할 수 있지 않나요?", "각 결과에 raceId를 부여하고 브라우저가 마지막으로 본 ID와 비교합니다. 새로운 ID일 때만 애니메이션을 실행해 폴링 중복 표시를 막았습니다."),
+    ]),
+    ("AI 퀴즈 파이프라인", "근거 기반 AI 퀴즈 파이프라인", [
+        ("JSON Schema를 사용하면 AI의 사실 오류도 없어지나요?", "아닙니다. Schema는 필드와 자료형만 보장합니다. 별도로 제공한 위키 경로와 source 일치 여부, 정답 인덱스, 선택지 범위를 서버에서 검사하며 사실성은 근거 제한과 향후 관리자 검수로 보완합니다."),
+        ("로컬 위키 문서에 잘못된 내용이 있으면 어떻게 되나요?", "현재 구조는 위키를 신뢰 가능한 내부 자료로 가정합니다. 따라서 문서 품질이 상한선이며, 운영 환경에서는 문서 승인 상태·버전·출처 해시를 저장해 어떤 근거로 생성됐는지 추적해야 합니다."),
+        ("OpenAI API 장애나 비용 문제는 어떻게 처리하나요?", "생성 결과를 DB에 저장해 재사용하고, 관리자가 생성을 끄면 저장 문제를 출제합니다. 따라서 외부 API가 없어도 기존 퀴즈 흐름은 유지됩니다."),
+    ]),
+    ("프로모션 UI", "외부 프로모션을 서비스 UI에 연결", [
+        ("광고 기능이 프로젝트 핵심 기술과 어떤 관련이 있나요?", "핵심 동시성 기능은 아니지만 실제 서비스에서 필요한 외부 콘텐츠 노출, 반응형 이미지, 접근성, 링크 연결과 노출 정책을 적용한 운영 기능입니다. 기술 핵심과 구분해 한 장으로만 설명합니다."),
+        ("Instagram 이미지를 직접 요청하지 않고 로컬에 둔 이유는 무엇인가요?", "외부 CDN 주소는 만료되거나 접근 정책에 따라 실패할 수 있습니다. 허용된 캠페인 이미지를 로컬 정적 자산으로 관리해 화면 렌더링을 안정화했습니다."),
+        ("sessionStorage로 노출을 제한하면 사용자 단위 제어가 가능한가요?", "브라우저 탭 세션 단위 제어만 가능합니다. 현재 요구에는 충분하지만 계정별 빈도 제한이나 노출 통계가 필요하면 서버 이벤트와 사용자별 저장이 필요합니다."),
+    ]),
+    ("통신 방식", "통신 구조: 현재 구현과 확장 경계", [
+        ("실시간 게임인데 왜 WebSocket을 사용하지 않았나요?", "최대 6명, 1초 수준 동기화라는 요구에서는 HTTP 폴링이 구현과 재연결 처리가 단순했습니다. 즉각적인 push가 필요한 규모가 되면 WebSocket과 Room 구독 구조로 전환할 계획입니다."),
+        ("기본 약 12 req/s는 실제 측정값인가요?", "6명 × 2개 API × 초당 1회로 계산한 요청 모델입니다. 실제 자동 테스트에서는 상태 조회 60건의 성공률과 응답 시간을 별도로 측정했으며 두 수치를 구분해 표기했습니다."),
+        ("최대 1초의 오래된 상태로 명령을 보내면 문제가 없나요?", "클라이언트 화면은 최대 1초 늦을 수 있습니다. 그래서 변경 요청 시 현재 턴·참가 여부·서버 주사위와 잔액을 다시 검사하고, 오래된 요청은 거절한 뒤 최신 상태를 다시 조회합니다."),
+    ]),
+    ("자동 동시 요청 테스트", "Python으로 반복 가능한 동시 요청 테스트 구성", [
+        ("Python ThreadPoolExecutor가 정말 동시에 요청을 보내나요?", "HTTP 요청은 I/O 작업이라 여러 Worker가 겹쳐 수행됩니다. 다만 완전히 같은 CPU 시각을 보장하는 시험은 아니며, 현재 테스트는 서버에 중첩 요청을 만들어 기능 일관성을 검증하는 목적입니다."),
+        ("60건과 6명으로 성능을 주장할 수 있나요?", "대규모 성능을 주장할 수 없습니다. 최대 6명이라는 실제 요구에서 성공률과 중복 차감 방지를 확인한 기능·동시성 검증입니다. p95도 이 실행 표본의 관찰값으로만 사용합니다."),
+        ("테스트가 무엇을 자동으로 판정하나요?", "6명 입장, 로비 인원, 사용자별 100 크레딧 1회 차감, 중복 요청 5건 거절, 상태 조회 실패 0건을 코드로 비교하고 Markdown 보고서를 생성합니다."),
+    ]),
+    ("실패와 트랜잭션", "실패 시나리오로 보는 데이터 일관성", [
+        ("정산 중 DB 예외가 나면 일부 사용자만 보상받을 수 있지 않나요?", "동일 정산 메서드의 JPA 변경은 하나의 트랜잭션으로 묶여 예외 시 롤백됩니다. 다만 이미 바뀐 메모리 게임 상태는 자동 복구되지 않으므로 상태 외부화나 보상 트랜잭션이 다음 과제입니다."),
+        ("중복 클릭은 프론트 버튼을 비활성화하면 충분하지 않나요?", "브라우저 조작, 네트워크 재시도와 직접 API 호출은 막을 수 없습니다. 사용 완료 카테고리와 참가 여부를 서버에서 다시 검사해야 최종 일관성을 보장할 수 있습니다."),
+        ("큐가 가득 차면 사용자 경험은 어떻게 되나요?", "128개를 넘으면 무한 대기 대신 즉시 실패하도록 설계했습니다. 현재는 재시도 안내를 반환하고, 운영 단계에서는 429 응답·Retry-After·지표 수집을 추가하는 것이 적절합니다."),
+    ]),
+    ("확장 전략", "현재 구조의 한계와 확장 전략", [
+        ("서버를 두 대로 늘리면 현재 구조가 바로 동작하나요?", "동작하지 않습니다. 세션과 게임 상태가 각 JVM에 나뉘고 단일 큐도 서버별로 분리됩니다. Redis 세션·Room 상태·Pub/Sub와 일관된 라우팅 또는 분산 락이 필요합니다."),
+        ("Room별 큐로 나누면 같은 플레이어 요청의 순서는 어떻게 보장하나요?", "roomId를 파티션 키로 사용해 같은 Room 명령은 동일 소비자에서 순서대로 처리하고 서로 다른 Room만 병렬 처리합니다. 메시지 ID와 멱등 키로 중복 실행도 방지해야 합니다."),
+        ("낙관적 락만 적용하면 동시성 문제가 해결되나요?", "DB 행 충돌은 감지할 수 있지만 인메모리 턴 상태와 메시지 순서는 해결하지 못합니다. 상태 저장 위치, 명령 순서, 재시도 정책을 함께 설계해야 합니다."),
+    ]),
+    ("AI 저장과 검증", "설명과 출처까지 저장해 서비스 자산으로", [
+        ("signature unique 제약으로 의미가 같은 문제도 막을 수 있나요?", "현재 signature는 정규화된 문장 중복을 막는 수준이라 표현이 다른 의미 중복은 남을 수 있습니다. 임베딩 유사도나 핵심 개념 키를 추가하면 의미 중복을 더 줄일 수 있습니다."),
+        ("source 경로가 일치하면 설명이 정확하다고 볼 수 있나요?", "볼 수 없습니다. 경로 검사는 허용되지 않은 출처 사용을 막을 뿐입니다. 문장 인용 범위 저장, 근거 문장 대조와 관리자 승인 상태가 추가되어야 품질을 높일 수 있습니다."),
+        ("문제 저장과 정답 보상은 어떻게 연결되나요?", "활성 문제 ID와 선택지 범위를 서버가 확인한 뒤 정답이면 같은 트랜잭션에서 크레딧을 저장합니다. 클라이언트가 정답 여부나 보상 금액을 결정하지 않습니다."),
+    ]),
+]
+qa_insertions = []
+for i, (topic, target_title, questions) in enumerate(qa_specs):
+    qa = interview_slide(topic, questions, 40 + i)
+    qa_insertions.append((prs.slides._sldIdLst[-1], target_title))
+
+detail_specs = [
+    ("요청 한 건이 처리되는 전체 경로", "System Architecture",
+     "조회와 변경 요청이 같은 인증 절차를 거치지만 변경 명령만 큐에 진입합니다.",
+     '''GET /api/state
+  -> auth(token)
+  -> service.state(player)
+
+POST /api/yacht/score
+  -> auth(token)
+  -> queue.run(command)
+  -> validate current turn
+  -> @Transactional save
+  -> response state''',
+     [("인증", "Bearer 토큰을 Player ID로 변환하고 lastSeen을 갱신", MINT),
+      ("경로 분리", "조회는 즉시 처리하고 변경만 순서 제어", BLUE),
+      ("도메인 검증", "Controller가 아닌 Service가 현재 상태를 확인", YELLOW),
+      ("응답 동기화", "명령 결과와 함께 최신 서버 상태를 반환", PINK)],
+     "GameController의 GET/POST 매핑과 GameCommandQueue.run 호출 경로"),
+    ("공유 상태의 소유권을 어디에 두었는가", "System Architecture",
+     "상태마다 수명과 일관성 요구가 달라 저장 위치를 구분했습니다.",
+     '''Browser
+  UI tab / animation / input
+
+Server memory
+  turn / lobby / chat / race result
+
+MySQL
+  player / credits / quiz question
+
+External
+  wiki source / AI response''',
+     [("브라우저", "잃어도 복구 가능한 표현 상태만 보유", MINT),
+      ("서버 메모리", "짧은 게임 세션의 빠른 공유 상태", BLUE),
+      ("DB", "재시작 후에도 필요한 크레딧과 문제", YELLOW),
+      ("외부 입력", "위키와 AI 응답은 검증 후 내부 데이터로 변환", PINK)],
+     "서버 재조회만으로 화면을 복구할 수 있도록 최종 판정 상태를 클라이언트 밖에 배치"),
+    ("크레딧 변경에서 지켜야 할 불변 조건", "크레딧 정산의 전체 생명주기",
+     "정산 코드는 기능보다 먼저 깨지면 안 되는 조건을 정의했습니다.",
+     '''void debit(long amount) {
+  if (amount < 10 || amount > 5000)
+    throw new IllegalArgumentException(...);
+  if (credits < amount)
+    throw new IllegalArgumentException(...);
+  credits -= amount;
+}
+
+// invariant
+credits >= 0
+one request == one debit''',
+     [("음수 방지", "현재 잔액보다 큰 차감 요청을 서버에서 거절", MINT),
+      ("허용 범위", "게임별 선택 가능한 금액을 다시 검사", BLUE),
+      ("단일 차감", "중복 참가 여부를 확인한 뒤 한 번만 저장", YELLOW),
+      ("정산 합계", "게임 결과의 지급 총액이 규칙과 일치해야 함", PINK)],
+     "Player.debit, allowed, joinYacht의 검증 순서와 6명 동시 요청 테스트"),
+    ("세션 생성과 비활성 사용자 정리", "User Flow",
+     "참여 코드 입장부터 비활성 세션 제거까지 사용자 수명을 서버가 관리합니다.",
+     '''String token = UUID.randomUUID().toString();
+sessions.put(token, player.getId());
+
+@Scheduled(fixedDelay = 30000)
+void cleanupInactivePlayers() {
+  var stale = repo.findByLastSeenBefore(
+      now.minusSeconds(30));
+  sessions.removeIf(stale);
+  repo.deleteAll(stale);
+}''',
+     [("입장 제한", "닉네임 중복과 최대 6명을 서버에서 검사", MINT),
+      ("토큰", "브라우저에는 임의 세션 토큰만 전달", BLUE),
+      ("활동 갱신", "인증 요청마다 lastSeen을 갱신", YELLOW),
+      ("정리", "30초 주기로 세션·게임 참가 상태를 제거", PINK)],
+     "GameService.join, auth, cleanupInactivePlayers의 실제 사용자 수명주기"),
+    ("야추를 상태 머신으로 해석하기", "턴과 상태를 서버가 관리하는 멀티플레이 야추",
+     "버튼별 코드가 아니라 허용 가능한 상태 전이로 게임 규칙을 구성했습니다.",
+     '''LOBBY
+  join -> ready -> START
+
+TURN
+  roll(1..3) -> hold -> score
+
+score
+  -> validate category
+  -> save points
+  -> next turn | FINISHED
+
+FINISHED
+  settle -> restart | leave''',
+     [("Lobby", "참가 금액 통일과 최소 인원을 검증", MINT),
+      ("Turn", "현재 플레이어와 굴림 횟수를 서버가 보유", BLUE),
+      ("Score", "사용 완료 항목과 서버 주사위를 검증", YELLOW),
+      ("Finish", "공동 우승·기권·환불까지 종료 상태로 처리", PINK)],
+     "SocialGameService의 joinYacht, roll, score, cancelYacht, leave 메서드"),
+    ("레이싱 결과가 모든 화면에 동일하게 도착하는 과정", "모든 플레이어가 같은 결과를 공유하는 레이싱",
+     "랜덤 생성과 애니메이션을 분리해 판정은 한 번, 표현은 각 브라우저에서 수행합니다.",
+     '''POST /race/start
+  Server: shuffle order once
+  Server: save RaceResult(raceId, order)
+  Client A: poll -> new raceId -> animate
+  Client B: poll -> new raceId -> animate
+  Client C: poll -> same order
+
+if (raceId != seenRaceId) {
+  seenRaceId = raceId;
+  playAnimation(order);
+}''',
+     [("단일 판정", "서버가 순위와 보상을 한 번 생성", MINT),
+      ("결과 식별", "raceId가 새 결과와 이전 결과를 구분", BLUE),
+      ("지연 허용", "도착 시점은 달라도 order는 동일", YELLOW),
+      ("표현 분리", "주행 시간은 결과 판정에 영향을 주지 않음", PINK)],
+     "GameService.race의 RaceResult와 main.tsx의 seenRace ref 비교"),
+    ("마피아 단계와 채팅 권한 처리", "게임 규칙을 상태 머신으로 확장",
+     "같은 채팅 기능도 현재 단계와 역할에 따라 접근 규칙이 달라집니다.",
+     '''String scope = phase.equals("NIGHT")
+    ? "MAFIA" : "DAY";
+
+if (scope.equals("MAFIA")
+    && !role.equals("MAFIA"))
+  throw new IllegalArgumentException(...);
+
+chat.add(new Message(
+  nickname, text, scope, round));''',
+     [("단계", "DAY·NIGHT·FINISHED를 서버 시간으로 전환", MINT),
+      ("역할", "밤에는 허용된 역할만 행동과 채팅 가능", BLUE),
+      ("생존", "탈락 사용자의 투표·채팅 요청을 거절", YELLOW),
+      ("범위", "메시지에 phase와 round를 저장해 노출을 분리", PINK)],
+     "MafiaGameService.chat, act, advance, requireAlive의 서버 권한 검사"),
+    ("시간 기반 캐릭터 이동 계산", "시간 기반 2D 캐릭터 컨트롤",
+     "프레임 수가 아니라 경과 시간으로 이동량을 계산해 환경 차이를 줄였습니다.",
+     '''const dt = Math.min(
+  (now - previous) / 1000,
+  0.032
+);
+
+x += direction * velocity * dt;
+vy -= GRAVITY * dt;
+y += vy * dt;
+
+if (landing) {
+  y = platformTop; vy = 0;
+}''',
+     [("Delta time", "초당 속도를 실제 경과 시간에 곱함", MINT),
+      ("상한", "긴 프레임 이후 이동 폭증을 32ms로 제한", BLUE),
+      ("충돌", "이전·현재 위치로 발판 통과 여부를 확인", YELLOW),
+      ("애니메이션", "입력과 grounded 상태로 idle·run·jump 전환", PINK)],
+     "requestAnimationFrame tick과 dt 기반 위치·중력·착지 계산"),
+    ("공용 채팅과 관리자 변경의 검증 경계", "공용 채팅과 크레딧 운영 시스템",
+     "화면 입력 제한과 별개로 서버가 문자열·권한·변경 단위를 다시 검사합니다.",
+     '''String clean = text.strip();
+if (clean.isBlank() || clean.length() > 200)
+  throw new IllegalArgumentException(...);
+
+chat.addLast(message);
+while (chat.size() > 80)
+  chat.removeFirst();
+
+admin(code);
+allowedAdjustment(amount);''',
+     [("입력", "공백·길이 초과 메시지를 서버에서 거절", MINT),
+      ("메모리 제한", "최근 80개만 유지해 무한 증가 방지", BLUE),
+      ("관리자 인증", "별도 코드와 Header로 운영 API 보호", YELLOW),
+      ("변경 단위", "허용된 크레딧 증감 값만 처리", PINK)],
+     "SocialGameService.chat과 GameService.admin/grantCredits의 검증 코드"),
+    ("배너와 모달의 노출 생명주기", "외부 프로모션을 서비스 UI에 연결",
+     "광고 이미지를 표시하는 것뿐 아니라 노출 조건·닫기·외부 이동을 함께 구현했습니다.",
+     '''const [promoOpen, setPromoOpen] = useState(
+  () => sessionStorage.getItem(
+    "arcade-promo-closed") !== "1"
+);
+
+function closePromo() {
+  setPromoOpen(false);
+  sessionStorage.setItem(
+    "arcade-promo-closed", "1");
+}
+
+target="_blank" rel="noreferrer"''',
+     [("초기 노출", "세션 내 닫기 기록이 없을 때만 모달 표시", MINT),
+      ("닫기", "상태와 sessionStorage를 함께 갱신", BLUE),
+      ("반응형", "원본 비율과 화면 최대 높이를 CSS로 제한", YELLOW),
+      ("외부 이동", "새 탭 보안 속성과 대체 텍스트 적용", PINK)],
+     "main.tsx의 promoOpen 상태와 styles.css의 배너·모달 미디어 쿼리"),
+    ("서버 중심 상태 관리의 방어 계층", "서버 중심 상태 관리",
+     "한 가지 기술에 의존하지 않고 서로 다른 실패를 막는 계층을 조합했습니다.",
+     '''Request validation
+  -> command queue
+  -> synchronized service
+  -> domain invariant
+  -> @Transactional DB write
+  -> response from server state''',
+     [("Validation", "잘못된 입력과 오래된 상태 요청 거절", MINT),
+      ("Ordering", "변경 명령을 하나의 실행 순서로 정렬", BLUE),
+      ("Critical section", "공유 Map과 게임 객체의 경쟁 접근 차단", YELLOW),
+      ("Persistence", "DB 변경의 원자성과 롤백 보장", PINK)],
+     "각 계층은 입력 오류·순서 충돌·메모리 경쟁·DB 부분 저장이라는 서로 다른 문제를 담당"),
+    ("현재 테스트 범위와 남은 공백", "검증 가능한 게임 규칙",
+     "검증된 영역과 아직 자동화하지 않은 영역을 구분해 다음 작업의 우선순위를 정했습니다.",
+     '''Current
+  Yacht scoring rules
+  Mafia phase / winner rules
+  6-user concurrent API script
+
+Next
+  Controller integration test
+  transaction rollback injection
+  frontend component test
+  reconnect / stale-state test''',
+     [("규칙 테스트", "입력 조합에 따른 결정적 계산 검증", MINT),
+      ("API 테스트", "실제 HTTP 동시 요청과 최종 상태 비교", BLUE),
+      ("부족한 부분", "예외 주입 기반 롤백 테스트는 아직 미구현", YELLOW),
+      ("우선순위", "크레딧과 상태가 함께 바뀌는 경로부터 확대", PINK)],
+     "JUnit 도메인 테스트와 reports의 6명 동시 요청 실행 결과를 별도 근거로 관리"),
+    ("폴링 요청량을 계산한 방법", "반복 요청이 만드는 서버 부하",
+     "요청 모델과 실제 측정값을 분리해 숫자의 의미를 명확히 했습니다.",
+     '''Per user / second
+  GET /api/state        = 1
+  GET /api/social/state = 1
+
+6 users * 2 endpoints
+  = 12 read requests / second
+
+Optional
+  mafia state = +6 req/s
+  admin APIs  = +1 req/s''',
+     [("기본 모델", "6명 모두 게임·소셜 상태를 초당 조회", MINT),
+      ("조건부 요청", "마피아 참여나 관리자 화면에서 추가", BLUE),
+      ("변경 명령", "사용자 행동 시에만 발생해 별도 계산", YELLOW),
+      ("측정 구분", "12 req/s는 계산, 60건 결과는 실행 측정", PINK)],
+     "frontend setInterval(1000/2000)과 실제 호출 API 목록을 기준으로 산정"),
+    ("1초 폴링에서 오래된 상태를 다루는 방법", "통신 구조: 현재 구현과 확장 경계",
+     "화면 지연을 허용하되 변경 요청의 정확성은 서버 재검증으로 보호합니다.",
+     '''t=0.0  server turn = A
+t=0.2  client B last view = A
+t=0.7  server advances to B
+t=0.8  client A sends stale command
+       -> activeTurn(A) rejects
+t=1.0  next poll receives turn = B''',
+     [("허용 지연", "표현 상태는 최대 약 1초 늦을 수 있음", MINT),
+      ("명령 검증", "현재 턴·상태 버전을 서버에서 확인", BLUE),
+      ("실패 응답", "오래된 명령을 적용하지 않고 오류 반환", YELLOW),
+      ("복구", "다음 조회 또는 명령 응답으로 최신 상태 표시", PINK)],
+     "SocialGameService.activeTurn과 클라이언트 1초 refresh 주기의 결합"),
+    ("제한된 명령 큐의 내부 동작", "명령 큐로 순서와 과부하를 통제",
+     "단일 실행 순서와 제한된 대기열로 일관성과 메모리 상한을 선택했습니다.",
+     '''new ThreadPoolExecutor(
+  1, 1,
+  0L, MILLISECONDS,
+  new ArrayBlockingQueue<>(128),
+  threadFactory,
+  new AbortPolicy()
+);
+
+CompletableFuture
+  .supplyAsync(command, executor)
+  .join();''',
+     [("Worker 1", "변경 명령이 완료된 순서를 명확히 함", MINT),
+      ("Queue 128", "대기 명령의 메모리 사용량에 상한 설정", BLUE),
+      ("Abort", "포화 시 무한 대기보다 빠른 실패 선택", YELLOW),
+      ("Exception", "CompletionException에서 원래 도메인 오류 복원", PINK)],
+     "GameCommandQueue.java의 ThreadPoolExecutor 생성자와 run 메서드"),
+    ("자동 테스트가 결과를 판정하는 방식", "Python으로 반복 가능한 동시 요청 테스트 구성",
+     "콘솔 출력만 남기지 않고 전후 상태를 비교해 PASS 조건을 코드로 고정했습니다.",
+     '''concurrent_join_passed = (
+  join_success == users
+  and lobby_count == users
+  and credits_once
+)
+
+duplicate_passed = (
+  duplicate_success == 0
+  and duplicate_rejected == 5
+  and duplicate_credit_unchanged
+)
+
+passed = concurrent_join_passed \
+  and duplicate_passed \
+  and polling_passed''',
+     [("전 상태", "각 Player ID와 초기 크레딧 저장", MINT),
+      ("후 상태", "참가 뒤 로비 인원과 크레딧 다시 조회", BLUE),
+      ("중복", "동일 토큰 요청 5건의 오류 메시지 확인", YELLOW),
+      ("보고서", "조건·성공률·latency를 Markdown으로 저장", PINK)],
+     "scripts/local_arcade_concurrency_test.py와 생성된 reports Markdown"),
+    ("트랜잭션 경계를 API 사건과 맞춘 이유", "트랜잭션 경계를 게임 결과와 맞추다",
+     "긴 게임 전체가 아니라 하나의 참가·점수 확정·정산 사건만 원자적으로 처리합니다.",
+     '''@Transactional
+Map<String,Object> score(...) {
+  YachtGame g = activeTurn(player);
+  validateDiceAndCategory(g, request);
+  sheet.put(category, calculate(...));
+
+  if (finished)
+    finishYacht(g); // credit + save
+  else
+    advanceTurn(g);
+
+  return state(player);
+}''',
+     [("시작", "현재 턴과 요청 데이터를 검증한 뒤 변경", MINT),
+      ("DB 범위", "해당 호출에서 발생한 크레딧 저장을 함께 처리", BLUE),
+      ("종료", "응답 직전에 최신 상태를 다시 구성", YELLOW),
+      ("주의", "Map과 YachtGame 변경은 DB rollback 밖에 존재", PINK)],
+     "SocialGameService.score의 메서드 트랜잭션과 synchronized 임계 구역"),
+    ("실패 이후 상태를 복구하는 기준", "실패 시나리오로 보는 데이터 일관성",
+     "실패 종류마다 거절·롤백·재조회·재시도 중 다른 복구 방식을 선택합니다.",
+     '''Invalid request
+  -> reject / no mutation
+
+DB exception
+  -> rollback DB transaction
+
+Stale client state
+  -> reject / return latest state
+
+Queue saturation
+  -> fail fast / retry later
+
+Inactive player
+  -> scheduled cleanup''',
+     [("사전 실패", "검증 단계에서 변경 전 거절", MINT),
+      ("저장 실패", "트랜잭션 롤백 후 오류 응답", BLUE),
+      ("상태 불일치", "서버 값을 기준으로 화면 재동기화", YELLOW),
+      ("운영 실패", "포화·비활성 상태를 제한과 정리로 해소", PINK)],
+     "중복 참가·점수 중복·DB 예외·큐 포화·비활성 사용자 시나리오를 분리"),
+    ("수평 확장을 단계별로 진행하는 이유", "현재 구조의 한계와 확장 전략",
+     "기능을 한 번에 분산시키지 않고 실제 병목이 나타나는 순서로 이동합니다.",
+     '''Phase 1
+  HTTP polling -> WebSocket
+
+Phase 2
+  session / room state -> Redis
+
+Phase 3
+  one queue -> room partitions
+
+Phase 4
+  DB version / idempotency key
+
+Phase 5
+  metrics / tracing / autoscale''',
+     [("통신", "변경 이벤트 push로 불필요한 조회 감소", MINT),
+      ("상태", "서버 간 세션과 Room 상태 공유", BLUE),
+      ("처리", "Room별 순서는 유지하며 서로 다른 Room 병렬화", YELLOW),
+      ("운영", "충돌·중복·지연을 지표로 관찰", PINK)],
+     "현재 병목인 폴링·JVM 상태·단일 큐를 순서대로 외부화하는 로드맵"),
+    ("AI 프롬프트에 근거를 고정하는 방법", "AI 문제 출제: 근거를 먼저 고정",
+     "모델이 자유롭게 지식을 추가하지 않도록 입력 문서와 출력 역할을 제한했습니다.",
+     '''excerpts = pickExcerpts(3);
+
+SYSTEM:
+  제공된 발췌문만 근거로 사용한다.
+  검증할 수 없는 내용은 묻지 않는다.
+
+INPUT:
+  [SOURCE path]
+  excerpt text...
+
+OUTPUT:
+  prompt / choices / answer
+  explanation / source''',
+     [("문서 선택", "출제 가능한 Markdown만 후보로 사용", MINT),
+      ("입력 제한", "발췌 크기와 문서 개수를 제한", BLUE),
+      ("지시", "근거 밖 내용을 질문하지 않도록 명시", YELLOW),
+      ("추적", "source를 출력 필수 필드로 요구", PINK)],
+     "QuizGameService의 pickExcerpts와 Responses API 입력 프롬프트"),
+    ("AI 응답을 두 단계로 검증하는 이유", "AI 응답은 서버 검증을 통과해야 한다",
+     "모델 출력 단계와 애플리케이션 저장 단계에서 서로 다른 오류를 막습니다.",
+     '''Layer 1: JSON Schema
+  required fields
+  2 <= choices <= 4
+  0 <= answer <= 3
+  additionalProperties = false
+
+Layer 2: Java validation
+  answer < choices.size()
+  source in provided excerpts
+  prompt / explanation not blank
+  retry <= 3''',
+     [("형식", "구문과 필수 필드를 모델 출력 단계에서 제한", MINT),
+      ("의미 범위", "실제 선택지 길이와 정답 인덱스 비교", BLUE),
+      ("출처", "이번 요청에서 제공한 경로인지 확인", YELLOW),
+      ("회복", "실패 원인을 폐기하고 제한 횟수만 재생성", PINK)],
+     "Structured Outputs Schema와 QuizGameService.validateGeneratedQuestion"),
+    ("생성 문제의 데이터 계보를 남기는 방법", "설명과 출처까지 저장해 서비스 자산으로",
+     "문제만 저장하지 않고 검증과 재사용에 필요한 메타데이터를 함께 보존합니다.",
+     '''QuizQuestion
+  id
+  category / type
+  prompt
+  choices[]
+  answerIndex
+  explanation
+  source
+  signature (unique)
+  createdAt
+
+generation -> validation -> save -> reuse''',
+     [("재현", "어떤 source에서 생성됐는지 저장", MINT),
+      ("설명", "정답과 함께 사용자 피드백 제공", BLUE),
+      ("중복", "정규화 signature의 unique 제약", YELLOW),
+      ("연속성", "생성 비활성화 시 저장 문제를 다시 출제", PINK)],
+     "QuizQuestionEntity와 signature repository 조회, AI OFF fallback 경로"),
+]
+
+detail_insertions = []
+for i, (title, target_title, premise, code_text, points, evidence) in enumerate(detail_specs):
+    detail = engineering_detail_slide(title, premise, code_text, points, evidence, 60 + i)
+    detail_insertions.append((prs.slides._sldIdLst[-1], target_title))
+
 # Communication model: distinguish the implemented transport from the scale-up design.
 communication_slide = base("통신 구조: 현재 구현과 확장 경계", "DEEP DIVE · COMMUNICATION", 17)
 rect(communication_slide, .7, 1.5, 5.65, 4.9, PANEL, LINE)
@@ -529,20 +1161,139 @@ rich_lines(communication_slide, [
     ("운영 과제  ", "재연결·순서·중복·backpressure 처리", BLUE),
 ], 7.05, 2.42, 4.95, 3.25, 13)
 text(communication_slide, "포트폴리오 표기 원칙 · 소켓 통신은 확장 설계이며, 현재 동작은 REST 폴링 기반", 1.25, 6.68, 10.8, .28, 14, WHITE, True, align=PP_ALIGN.CENTER)
+communication_id = prs.slides._sldIdLst[-1]
+
+# Business and personal closing — placed after the engineering proof.
+business_slide = base("비즈니스 모델: 구현 기능에서 출발한 수익 가설", "05 · BUSINESS MODEL", 64)
+models = [
+    ("BASE", "무료 로컬 버전", "친구·교실이 직접 실행하는 기본 게임과 AI 저장 문제", "목표: 사용 장벽과 배포 마찰 검증", MINT),
+    ("SPONSORED", "캠페인 노출", "배너·세션 모달·테마 콘텐츠를 행사 단위로 구성", "목표: 노출보다 참여·클릭·완료 측정", BLUE),
+    ("PACKAGE", "수업·행사 패키지", "조직 전용 퀴즈·브랜딩·관리자 운영 화면 제공", "목표: 반복 운영 시간 절감", YELLOW),
+    ("HOSTED", "운영형 서비스", "원격 접속 수요가 검증된 뒤 Room·계정·통계를 포함한 호스팅", "목표: 인프라 비용을 감당할 수요 확인", PINK),
+]
+for i, (tag, head, body, goal, c) in enumerate(models):
+    x = .68 + (i % 2) * 6.15
+    y = 1.48 + (i // 2) * 2.5
+    rect(business_slide, x, y, 5.78, 2.15, PANEL, LINE)
+    pill(business_slide, tag, x+.26, y+.26, 1.22, c)
+    text(business_slide, head, x+1.72, y+.28, 3.72, .35, 16, WHITE, True)
+    text(business_slide, body, x+.26, y+.93, 5.22, .48, 12.2, MUTED)
+    text(business_slide, goal, x+.26, y+1.62, 5.22, .28, 11, c, True)
+text(business_slide, "현재 상태", .75, 6.55, 1.0, .24, 11, BLUE, True)
+text(business_slide, "포트폴리오용 비상업 프로젝트 · 위 항목은 실제 매출이 아닌 검증 순서를 가진 확장 가설", 1.85, 6.48, 10.25, .36, 13, WHITE, True)
+business_id = prs.slides._sldIdLst[-1]
+
+business_guard_slide = base("비즈니스 가설을 검증하는 기준", "05 · VALIDATION & GUARDRAILS", 65)
+checks = [
+    ("VALUE", "사용자가 다시 여는가", "세션당 재경기·7일 내 재사용·진행자 개입 횟수", MINT),
+    ("AD", "광고가 경험을 해치지 않는가", "세션당 모달 1회·닫기 가능·배너 레이아웃 안정성", BLUE),
+    ("COST", "AI와 운영 비용이 감당되는가", "생성 문제 재사용·fallback 비율·문제당 생성 비용", YELLOW),
+    ("RIGHTS", "콘텐츠를 안전하게 쓰는가", "허가된 이미지·원문 링크·대체 텍스트·자료 출처", PINK),
+]
+for i, (tag, question, metric, c) in enumerate(checks):
+    y = 1.5 + i * 1.18
+    pill(business_guard_slide, tag, .78, y+.08, 1.0, c)
+    text(business_guard_slide, question, 2.08, y+.08, 3.05, .36, 16, WHITE, True)
+    rect(business_guard_slide, 5.35, y-.02, 6.95, .82, PANEL, LINE)
+    text(business_guard_slide, metric, 5.68, y+.2, 6.35, .36, 13, MUTED)
+text(business_guard_slide, "의사결정 원칙", .78, 6.42, 1.35, .24, 11, MINT, True)
+text(business_guard_slide, "지표가 개선되지 않으면 기능을 늘리지 않고, 가장 작은 파일럿으로 돌아가 문제와 타깃을 다시 검증합니다.", 2.22, 6.34, 9.92, .45, 14, WHITE, True)
+business_guard_id = prs.slides._sldIdLst[-1]
+
+contribution_slide = base("개인 기여: 설계 결정부터 검증까지", "06 · ROLE & CONTRIBUTION", 66)
+contributions = [
+    ("기획", "LAN·최대 6명·코드 입장이라는 범위를 정의하고 사용자 흐름과 게임 규칙 설계", MINT),
+    ("프론트엔드", "React/TypeScript로 게임·채팅·관리자·광고 화면과 애니메이션 구현", BLUE),
+    ("백엔드", "Spring Boot로 서버 판정, 상태 머신, 명령 큐, 세션 정리와 API 구현", YELLOW),
+    ("데이터·AI", "JPA 트랜잭션과 AI 문제 생성·Schema·출처 검증·DB fallback 구성", PINK),
+    ("테스트", "도메인 규칙 JUnit 및 Python 병렬 요청 스크립트와 결과 보고서 작성", MINT),
+]
+for i, (head, body, c) in enumerate(contributions):
+    y = 1.45 + i * 1.02
+    text(contribution_slide, f"0{i+1}", .78, y+.2, .52, .25, 12, c, True, "Arial")
+    text(contribution_slide, head, 1.52, y+.14, 1.45, .34, 16, WHITE, True)
+    rect(contribution_slide, 3.12, y, 9.18, .78, PANEL, LINE)
+    text(contribution_slide, body, 3.42, y+.18, 8.6, .38, 13, MUTED)
+text(contribution_slide, "기여도 100%", .78, 6.6, 1.4, .25, 12, BLUE, True)
+text(contribution_slide, "혼자 구현했기 때문에 ‘무엇을 만들었는가’뿐 아니라 ‘왜 이 경계를 선택했는가’를 코드와 측정 결과로 설명합니다.", 2.3, 6.5, 9.85, .42, 13.5, WHITE, True)
+contribution_id = prs.slides._sldIdLst[-1]
+
+future_slide = base("회고에서 다음 검증으로", "06 · RETROSPECTIVE & FUTURE", 67)
+future_items = [
+    ("배운 점", "공유 상태는 UI보다 서버의 명령 순서·검증·실패 경계에서 신뢰가 결정됩니다.", MINT),
+    ("현재 한계", "단일 서버 메모리와 폴링은 현재 6명 범위에는 단순하지만 재시작·수평 확장에 취약합니다.", BLUE),
+    ("다음 구현", "Room별 명령 큐, WebSocket push, Redis 상태 외부화와 Controller 통합 테스트를 단계 도입합니다.", YELLOW),
+    ("다음 검증", "실제 4~6명 파일럿에서 첫 게임 시작 시간·재경기·오류·진행자 개입을 측정합니다.", PINK),
+]
+for i, (head, body, c) in enumerate(future_items):
+    x = .7 + (i % 2) * 6.17
+    y = 1.5 + (i // 2) * 2.35
+    rect(future_slide, x, y, 5.8, 1.95, PANEL, LINE)
+    text(future_slide, f"0{i+1}", x+.28, y+.28, .48, .25, 12, c, True, "Arial")
+    text(future_slide, head, x+.98, y+.23, 1.38, .34, 16, WHITE, True)
+    text(future_slide, body, x+.98, y+.8, 4.35, .72, 12.5, MUTED)
+text(future_slide, "다음 단계는 더 많은 기능이 아니라, 실제 사용 근거와 실패 복구 범위를 넓히는 것입니다.", .8, 6.5, 11.45, .38, 15, WHITE, True, align=PP_ALIGN.CENTER)
+future_id = prs.slides._sldIdLst[-1]
 
 # Keep Result as the final slide after the deep-dive section.
 slide_ids = prs.slides._sldIdLst
-communication_id = slide_ids[-1]
+def slide_id_by_exact_text(value):
+    for index, slide in enumerate(prs.slides):
+        if any(hasattr(shape, "text") and shape.text.strip() == value for shape in slide.shapes):
+            return slide_ids[index]
+    raise ValueError(f"slide title not found: {value}")
+
+resolved_qa_insertions = [
+    (qa_id, slide_id_by_exact_text(target_title))
+    for qa_id, target_title in qa_insertions
+]
+resolved_detail_insertions = [
+    (detail_id, slide_id_by_exact_text(target_title))
+    for detail_id, target_title in detail_insertions
+]
 # Remove movable slides first, then insert them at their narrative positions.
-for movable in (planning_id, economy_id, concurrency_id, ad_id, load_test_id, test_code_id, communication_id, result_id):
+for movable in (
+    planning_id, economy_id, concurrency_id, ad_id, load_test_id,
+    test_code_id, communication_id, retrospective_id,
+    business_id, business_guard_id, contribution_id, future_id, result_id,
+    *(qa_id for qa_id, _ in resolved_qa_insertions),
+    *(detail_id for detail_id, _ in resolved_detail_insertions),
+):
     slide_ids.remove(movable)
-slide_ids.insert(3, planning_id)       # after project overview
-slide_ids.insert(6, economy_id)        # after architecture
-slide_ids.insert(14, ad_id)            # after operations
-slide_ids.insert(19, communication_id) # after traffic model
-slide_ids.insert(21, concurrency_id)   # after command queue
-slide_ids.insert(22, load_test_id)     # measured evidence after concurrency design
-slide_ids.insert(23, test_code_id)     # reproducible test implementation
+
+def insert_after(movable_id, target_id):
+    target_index = list(slide_ids).index(target_id)
+    slide_ids.insert(target_index + 1, movable_id)
+
+insert_after(planning_id, slide_id_by_exact_text("프로젝트 소개"))
+insert_after(economy_id, slide_id_by_exact_text("System Architecture"))
+insert_after(ad_id, slide_id_by_exact_text("공용 채팅과 크레딧 운영 시스템"))
+insert_after(communication_id, slide_id_by_exact_text("반복 요청이 만드는 서버 부하"))
+insert_after(concurrency_id, slide_id_by_exact_text("명령 큐로 순서와 과부하를 통제"))
+insert_after(load_test_id, concurrency_id)
+insert_after(test_code_id, load_test_id)
+
+# Place each interview follow-up immediately after its implementation page.
+for qa_id, target_id in resolved_qa_insertions:
+    target_index = list(slide_ids).index(target_id)
+    slide_ids.insert(target_index + 1, qa_id)
+
+# Detail pages are inserted after the evidence page and before its Q&A page.
+# Preserve specification order when more than one detail page shares a target.
+detail_tail = {}
+for detail_id, target_id in resolved_detail_insertions:
+    insert_after = detail_tail.get(target_id, target_id)
+    target_index = list(slide_ids).index(insert_after)
+    slide_ids.insert(target_index + 1, detail_id)
+    detail_tail[target_id] = detail_id
+
+# Close the portfolio only after every technical claim, detail and interview
+# answer has been shown. This keeps the business section grounded in evidence.
+slide_ids.append(business_id)
+slide_ids.append(business_guard_id)
+slide_ids.append(contribution_id)
+slide_ids.append(retrospective_id)
+slide_ids.append(future_id)
 slide_ids.append(result_id)
 
 # Renumber footers after section reordering so the deck feels manually edited
